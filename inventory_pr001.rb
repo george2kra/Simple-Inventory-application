@@ -2,17 +2,33 @@ require 'artii'
 
 ## define and set all shelves to empty
 @shelf = Hash.new   # defining shelf as a hash ligteral
-def default_settings
-  # there are 5 racks, each rack has 4 shelves,
-    # each shelf can hold one chef pallet
-    # Total 20 shelves, hash key r1s1, r1s2, r1s3, etc set to empty
-  (1..5).each do |frame|
-    rack = "r#{frame}"  # iterate r1 to r5 for rack_id
-    (1..4).each do |ledge|
-      shelves = "#{rack}s#{ledge}"  # interate for each rack s1 to s4 ir r1s1, r1s2 etc
-      @shelf[shelves] = 'empty'  # adding into shelf hash setting their values to empty
+def default_settings(howmany_racks,shelves_perrack)
+  # howmany_racks is rack count, shelves_perrack how many shelves per rack
+=begin
+  # Determine how many shelves currently exist
+  current_shelves = @shelf.length
+  if @shelf.length == 0
+    start_shelf = 1
+  else
+    start_shelf = @shelf.length + 1
+    howmany_racks = start_shelf + howmany_racks
+  end
+  puts "shelves #{@shelf.length} starting #{start_shelf}"
+  $stdin.gets.chomp.upcase
+=end
+  if @shelf.length == 0
+    start_shelf = 1
+  end
+
+  # Define the shelves and set them to empty status
+  (start_shelf..howmany_racks).each do |frame|
+    rack = "r#{frame}"  # iterate r1 to r many
+    (1..shelves_perrack).each do |ledge|
+      shelves = "#{rack}s#{ledge}"  # interate each rack with suffx s1 to s many
+      @shelf[shelves] = 'empty'  # setting each shelf hash key value to empty
     end
   end
+
 end  # end of default_settings
 
 #temporary set up for testing
@@ -53,9 +69,7 @@ def shelf_status  # display how many shelves are empty
       empty_shelf_count += 1
     end
   end
-  empty_shelf_count  #
-  puts
-  puts "There is #{empty_shelf_count} empty shelves out of #{@shelf.length}"
+  empty_shelf_count  # tally of empty shelves
 end  # shelf_status
 
 def list_products
@@ -79,6 +93,10 @@ def search_for_products(product_name)  # product look up
       shelf_ids << ledge
     end
   end
+  if product_count == 0
+    puts "Product #{product_name} was not found. "
+    puts
+  end
   return product_count, shelf_ids
 end  # search_for_products
 
@@ -92,17 +110,20 @@ def logoheader    # method that clears the screen and places the logo
 end  # end for method: clear
 
 def inventory_menu  # a method for the main menu
-
-  puts "Your last menu action was at #{Time.now.strftime('%H:%M:%S')}"
+  empty_shelf_count = shelf_status
+  used_shelf_count = @shelf.length - empty_shelf_count
+  puts "Used Shelves as at #{Time.now.strftime('%H:%M:%S')}:- #{used_shelf_count} / #{@shelf.length}"
   puts
   menustring = "Please select function"
   puts "#{menustring}"
   puts "-" * menustring.length
-  puts "1 - Shelve status and items list"
-  puts "2 - Look up or update an item"
-  puts "3 - Add an item into inventory"
-  puts "4 - ship out (delete) an item"
-  # puts "5 - Move an item onto another shelf"
+  puts "1 - Shelve status and stocked Products"
+  puts "2 - Look for a shelved Product"
+  puts "3 - Add a Product into the inventory"
+  puts "4 - Ship out a Product"
+  # puts "5 - Move a Product onto another shelf"
+  # if manager ......
+  # puts "6 - Add or Remove shelves"  # for removal check if shelves are empty or move them
   puts
   puts "x - To exit out of menu"
 
@@ -117,7 +138,8 @@ end   # end of game_menu
 ### Body ###
 
 ## -----------------
-default_settings  # set all sjelves to empty
+## WIP if shelf.csv file exists then DO NOT execute default_settings
+default_settings(6,4)  # set all sjelves to empty
    add_some_products  # add products onto the shelf
 ## -----------------
 
@@ -137,7 +159,10 @@ while open_menu
     open_menu = false
 
   elsif menu_select == '1'  # option 1 is to display the current shelf status and stocked products
-    shelf_status  # display the current shelf status and stocked products
+    empty_shelf_count = shelf_status  # display the current shelf status and stocked products
+    used_shelf_count = @shelf.length - empty_shelf_count
+    puts
+    puts "There are #{used_shelf_count} used shelves out of #{@shelf.length}"
     list_products
     $stdin.gets.chomp
     logoheader
@@ -167,7 +192,7 @@ while open_menu
     $stdin.gets.chomp
     logoheader
 
-  elsif menu_select == '4'
+  elsif menu_select == '4'  # option 4 ship a product
 
     puts "Enter the product name for shipping:"
     product_name = $stdin.gets.chomp
@@ -175,17 +200,24 @@ while open_menu
     product_count,shelf_ids = search_for_products(product_name)
     if product_count > 1
       puts
-      puts "Product #{product_name} are on shelves: "
+      puts "Product #{product_name} are on the following shelves: "
       product_count.times { |n| puts shelf_ids[n] }
       puts "Which shelf do you want to ship?"
       shelf_id = $stdin.gets.chomp
     else
       shelf_id = shelf_ids[0]
     end
-    puts
-    puts "Product #{product_name} has been shipped and shelf #{shelf_id} is now empty"
-    @shelf[shelf_id] = 'empty'
+    if product_count > 0
+      puts
+      puts "Product #{product_name} has been shipped and shelf #{shelf_id} is now empty"
+      @shelf[shelf_id] = 'empty'
+    end
     $stdin.gets.chomp
+    logoheader
+
+  elsif menu_select == ''  # refesh the screen menu
+    puts "Refeshing screen Menu "
+    sleep 2
     logoheader
 
   else

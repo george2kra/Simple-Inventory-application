@@ -1,5 +1,5 @@
 require 'artii'
-
+## whn fr racks, have a work reuest table for move request.
 ## define and set all shelves to empty
 @shelf = Hash.new   # defining shelf as a hash ligteral
 def default_settings(howmany_racks,shelves_perrack)
@@ -117,13 +117,12 @@ def inventory_menu  # a method for the main menu
   menustring = "Please select function"
   puts "#{menustring}"
   puts "-" * menustring.length
-  puts "1 - Shelve status and stocked Products"
+  puts "1 - Detailed Shelf status"
   puts "2 - Look for a shelved Product"
   puts "3 - Add a Product into the inventory"
   puts "4 - Ship out a Product"
-  # puts "5 - Move a Product onto another shelf"
-  # if manager ......
-  # puts "6 - Add or Remove shelves"  # for removal check if shelves are empty or move them
+  puts "5 - Move a Product onto another shelf"
+  puts "6 - Add more / freeze / Remove shelves  - Requires Admin status"
   puts
   puts "x - To exit out of menu"
 
@@ -214,6 +213,18 @@ while open_menu
     end
     $stdin.gets.chomp
     logoheader
+
+  elsif menu_select == '5'  # refesh the screen menu
+    puts "The 'Move pallet' is not available on this version .... "
+    sleep 2
+    logoheader
+
+  elsif menu_select == '6'  # refesh the screen menu
+    puts "The 'Shelf Administration' is not available on this version .... "
+    sleep 2
+    logoheader
+
+
 
   elsif menu_select == ''  # refesh the screen menu
     puts "Refeshing screen Menu "
